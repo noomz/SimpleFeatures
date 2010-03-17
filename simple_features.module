@@ -1,0 +1,95 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ */
+
+define('DEFAULT_FEATURES_PATH', '/sites/all/simple_features');
+
+/**
+ * Implement hook_permission().
+ */
+function simple_features_permission() {
+  return array(
+    'turn on features' => array(
+      'title' => 'turn on features',
+      'description' => 'Choose which roles can use any features',
+    ),
+  );
+}
+
+/**
+ * Implement hook_menu().
+ */
+function simple_features_menu() {
+  $items = array();
+
+  $items['admin/config/system/features_list'] = array(
+    'title' => t('Features list'),
+    'description' => t('Turn on or off site\'s features.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('simple_features_features_list_form'),
+    'access arguments' => array('turn on features'),
+    'file' => 'simple_features.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Get all available features.
+ */
+function simple_features_get_all_features() {
+  if ($configs = cache_get('simple_features_features_config')) {
+    //return $configs->data;
+  }
+
+  $path = getcwd() . DEFAULT_FEATURES_PATH;
+  try {
+    $feats = scandir($path);
+  }
+  catch (Exception $e) {
+    watchdog($e->getMessage(), WATCHDOG_ERROR);
+    drupal_set_message($e->getMessage(), 'error');
+    return;
+  }
+
+  $feats = array_filter($feats, create_function('$feat',
+    'return preg_match("/.feat$/", $feat);'
+  ));
+
+  $configs = array();
+  foreach ($feats as $feat) {
+    $configs[drupal_substr($feat, 0, -5)] = parse_ini_file($path .'/'. $feat, TRUE);
+  }
+
+  cache_set('simple_features_features_config', $configs, 'cache',
+      CACHE_TEMPORARY);
+
+  return $configs;
+} 
+
+/**
+ * Implement hook_form_alter().
+ */
+function simple_features_form_alter(&$form, &$form_state, $form_id) {
+  $path = drupal_substr(DEFAULT_FEATURES_PATH, 1);
+  $configs = simple_features_get_all_features();
+  foreach ($configs as $key => $config) {
+    if (in_array($form_id, $config['forms'])) {
+      include_once($path .'/'. $key .'.form.inc');
+    }
+  }
+}
+
+/**
+ * Do fill in form.
+ */
+function simple_features_auto_fill_form($features) {
+  $path = drupal_substr(DEFAULT_FEATURES_PATH, 1);
+  $configs = simple_features_get_all_features();
+  foreach ($features as $feature) {
+    include_once($path .'/'. $configs[$feature]['name'] .'.auto');
+  }
+}
