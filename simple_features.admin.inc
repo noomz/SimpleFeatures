@@ -55,21 +55,6 @@ function simple_features_features_list_form_submit($form, &$form_state) {
   $enabled = $modules[1];
   module_disable($disabled);
   module_enable($enabled);
-  simple_features_auto_fill_form($enabled);
+  simple_features_auto_config(array_keys($form_state['values']['simple_features_list']));
   drupal_flush_all_caches();
-}
-
-/**
- * Format form element name.
- */
-function format_form_element_name($name) {
-  return strtr($name, array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
-}
-
-/**
- * Return unformat form element name.
- */
-function unformat_form_element_name($name) {
-  // TODO:
-  return strtr($name, array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
 }
