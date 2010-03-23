@@ -13,18 +13,19 @@ function simple_features_features_list_form() {
   $form = array();
 
   $features = simple_features_get_all_features();
-  $options = array();
-  foreach ($features as $feature) {
-    $options[$feature['name']] = $feature['description'];
-  }
-
+  $simple_features_list = variable_get('simple_features_list', array());
   $form['simple_features_list'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Features list'),
-    '#description' => t('Select which features you want to use.'),
-    '#options' => $options,
-    '#default_value' => variable_get('simple_features_list', array()),
+    '#type' => 'form',
+    '#tree' => TRUE,
   );
+  foreach ($features as $key => $feature) {
+    $form['simple_features_list'][$key] = array(
+      '#type' => 'checkbox',
+      '#title' => $feature['description'],
+      '#default_value' => $simple_features_list[$key],
+      '#suffix' => l("Configure...", $feature['config'], array('query' => array('destination' => 'admin/config/system/features_list'))),
+    );
+  }
 
   $form['#submit'][] = 'simple_features_features_list_form_submit';
 
@@ -36,25 +37,25 @@ function simple_features_features_list_form() {
  */
 function simple_features_features_list_form_submit($form, &$form_state) {
   $configs = simple_features_get_all_features();
-  $features_configs = array();
-  foreach ($configs as $config) {
-    $features_configs[$config['name']] = $config;
-  }
-
+  
   $modules = array(0 => array(), 1 => array());
-  foreach ($form_state['values']['simple_features_list'] as $key => $feature) {
+  $features_list = $form_state['values']['simple_features_list'];
+  foreach ($features_list as $key => $feature) {
     $status = (int)!empty($feature);
     $modules[$status] = array_merge(
         $modules[$status],
-        $features_configs[$key]['dependencies']
+        $configs[$key]['dependencies']
     );
   }
+
+  $already_enabled = variable_get('simple_features_list', array());
+  $will_config = array_diff($features_list, $already_enabled);
 
   // Extract module that will be enabled from disabled list.
   $disabled = array_diff($modules[0], $modules[1]);
   $enabled = $modules[1];
   module_disable($disabled);
   module_enable($enabled);
-  simple_features_auto_config(array_keys($form_state['values']['simple_features_list']));
+  simple_features_auto_config($will_config);
   drupal_flush_all_caches();
 }

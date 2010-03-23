@@ -40,8 +40,8 @@ function simple_features_menu() {
 /**
  * Get all available features.
  */
-function simple_features_get_all_features() {
-  if ($configs = cache_get('simple_features_features_config')) {
+function simple_features_get_all_features($cache = False) {
+  if ($cache && $configs = cache_get('simple_features_features_config')) {
     return $configs->data;
   }
 
@@ -88,8 +88,7 @@ function simple_features_form_alter(&$form, &$form_state, $form_id) {
  */
 function simple_features_auto_config($features) {
   $path = drupal_substr(DEFAULT_FEATURES_PATH, 1);
-  $configs = simple_features_get_all_features();
-  foreach ($features as $feature) {
-    include_once($path .'/'. $configs[$feature]['name'] .'.auto.inc');
+  foreach ($features as $key => $feature) {
+    include_once($path .'/'. $key .'.auto.inc');
   }
 }
