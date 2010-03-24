@@ -25,11 +25,11 @@ function simple_features_permission() {
 function simple_features_menu() {
   $items = array();
 
-  $items['admin/config/system/features_list'] = array(
+  $items['admin/config/system/features'] = array(
     'title' => t('Features list'),
     'description' => t('Turn on or off site\'s features.'),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('simple_features_features_list_form'),
+    'page arguments' => array('simple_features_list_form'),
     'access arguments' => array('turn on features'),
     'file' => 'simple_features.admin.inc',
   );
@@ -38,57 +38,82 @@ function simple_features_menu() {
 }
 
 /**
- * Get all available features.
+ * Load feature object.
  */
-function simple_features_get_all_features($cache = False) {
-  if ($cache && $configs = cache_get('simple_features_features_config')) {
-    return $configs->data;
-  }
-
-  $path = getcwd() . DEFAULT_FEATURES_PATH;
-  try {
-    $feats = scandir($path);
-  }
-  catch (Exception $e) {
-    watchdog($e->getMessage(), WATCHDOG_ERROR);
-    drupal_set_message($e->getMessage(), 'error');
-    return;
-  }
-
-  $feats = array_filter($feats, create_function('$feat',
-    'return preg_match("/.feat$/", $feat);'
-  ));
-
-  $configs = array();
-  foreach ($feats as $feat) {
-    $configs[drupal_substr($feat, 0, -5)] = parse_ini_file($path .'/'. $feat, TRUE);
-  }
-
-  cache_set('simple_features_features_config', $configs, 'cache',
-      CACHE_TEMPORARY);
-
-  return $configs;
-} 
-
-/**
- * Implement hook_form_alter().
- */
-function simple_features_form_alter(&$form, &$form_state, $form_id) {
-  $path = drupal_substr(DEFAULT_FEATURES_PATH, 1);
-  $configs = simple_features_get_all_features();
-  foreach ($configs as $key => $config) {
-    if (!empty($config['forms']) && in_array($form_id, $config['forms'])) {
-      include_once($path .'/'. $key .'.form.inc');
-    }
-  }
+function simple_features_load_feature(string $feature_name) {
+  $features = _load_features();
 }
 
 /**
- * Do fill in form.
+ * Helper function to load all available features.
  */
-function simple_features_auto_config($features) {
-  $path = drupal_substr(DEFAULT_FEATURES_PATH, 1);
-  foreach ($features as $key => $feature) {
-    include_once($path .'/'. $key .'.auto.inc');
+function _load_features() {
+  $features = array();
+  $modules = db_query("SELECT * FROM {system} WHERE type = 'module'")->fetchAll();
+  foreach ($modules as &$module) {
+    $module->info = unserialize($module->info);
+    if (@$module->info['parent'] == 'simple_features') {
+      $features[$module->info['package']][] = $module;
+    }
+  }
+    
+  return $features;
+}
+
+class Feature {
+  public $name, $info, $settings;
+
+  function __construct($feature_name) {
+    $this->name = $feature_name;
+    $settings = db_query("
+      SELECT name, value
+        FROM {sf_settings}
+        WHERE feature = :feature_name LIMIT 1",
+      array(':feature_name' => $feature_name)
+    )
+    ->fetchAll();
+    foreach ($settings as $value) {
+      $this->settings[$value->name] = $value->value;
+    }
+  }
+
+  function get_settings($key) {
+    if (array_key_exists($key, $this->settings)) {
+      return $this->settings[$key];
+    }
+    else {
+      return FALSE;
+    }
+  }
+
+  function save_settings() {
+    if (empty($this->settings)) {
+      return TRUE;
+    }
+
+    $txn = db_transaction();
+    try {
+      // Clear all old values.
+      db_delete('sf_settings')
+        ->condition('feature', $this->name)
+        ->execute();
+
+      // Begin insertion.
+      $query = db_insert('sf_settings')
+        ->fields(array('feature', 'name', 'value'));
+      foreach ($this->settings as $name => $value) {
+        $query->values(array(
+          'feature' => $this->name,
+          'name' => $name,
+          'value' => $value,
+        ));
+      }
+      $query->execute();
+      return TRUE;
+    }
+    catch (Exception $e) {
+      $txn->rollback();
+      return False;
+    }
   }
 }

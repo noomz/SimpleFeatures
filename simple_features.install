@@ -1,0 +1,40 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function simple_features_schema() {
+  $schema['sf_settings'] = array(
+    'description' => 'Stores each features settings',
+    'fields' => array(
+      'feature' => array(
+        'description' => 'Module machine name from {system}',
+        'type' => 'varchar',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'length' => 255,
+      ),
+      'name' => array(
+        'description' => 'Name of form element',
+        'type' => 'varchar',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'length' => 255,
+      ),
+      'value' => array(
+        'description' => 'Value',
+        'type' => 'text',
+        'size' => 'normal',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('feature', 'name'),
+  );
+
+  return $schema;
+}
