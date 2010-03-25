@@ -25,8 +25,8 @@ function simple_features_permission() {
 function simple_features_menu() {
   $items = array();
 
-  $items['admin/config/system/features'] = array(
-    'title' => t('Features list'),
+  $items['admin/features'] = array(
+    'title' => t('Features'),
     'description' => t('Turn on or off site\'s features.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('simple_features_list_form'),
@@ -41,30 +41,20 @@ function simple_features_menu() {
  * Load feature object.
  */
 function simple_features_load_feature(string $feature_name) {
-  $features = _load_features();
-}
-
-/**
- * Helper function to load all available features.
- */
-function _load_features() {
-  $features = array();
-  $modules = db_query("SELECT * FROM {system} WHERE type = 'module'")->fetchAll();
-  foreach ($modules as &$module) {
-    $module->info = unserialize($module->info);
-    if (@$module->info['parent'] == 'simple_features') {
-      $features[$module->info['package']][] = $module;
-    }
-  }
-    
-  return $features;
+  $features = Feature::getInfoAll();
 }
 
 class Feature {
-  public $name, $info, $settings;
+
+  public $name;
+  public $status;
+  public $info;
+  public $settings;
 
   function __construct($feature_name) {
     $this->name = $feature_name;
+    $this->info = Feature::getInfo($feature_name);
+    $this->status = $this->info->status;
     $settings = db_query("
       SELECT name, value
         FROM {sf_settings}
@@ -72,11 +62,16 @@ class Feature {
       array(':feature_name' => $feature_name)
     )
     ->fetchAll();
+    // Make default empty settings as array.
+    $this->settings = array();
     foreach ($settings as $value) {
       $this->settings[$value->name] = $value->value;
     }
   }
 
+  /**
+   * Return settings value or empty string if not exist.
+   */
   function get_settings($key) {
     if (array_key_exists($key, $this->settings)) {
       return $this->settings[$key];
@@ -86,11 +81,20 @@ class Feature {
     }
   }
 
+  /**
+   * Save settings values to database.
+   */
   function save_settings() {
     if (empty($this->settings)) {
       return TRUE;
     }
 
+    // As db_merge will be supported multiple values in drupal 8,
+    // we need to delete all old settings before inserting new values.
+    // By using db_insert multiple values method, I don't sure if it
+    // increase preformance or not. (May be this help when values to
+    // save is more than 100)
+    // TODO: revise the method again.
     $txn = db_transaction();
     try {
       // Clear all old values.
@@ -114,6 +118,100 @@ class Feature {
     catch (Exception $e) {
       $txn->rollback();
       return False;
+    }
+  }
+
+  /**
+   * Helper function to load all available features.
+   */
+  public static function getInfoAll($group = TRUE) {
+    $features = array();
+    $modules = db_query("SELECT * FROM {system} WHERE type = 'module'")->fetchAll();
+    foreach ($modules as &$module) {
+      $module->info = unserialize($module->info);
+      if (@$module->info['parent'] == 'simple_features') {
+        if ($group) {
+          $features[$module->info['package']][] = $module;
+        }
+        else {
+          $features[$module->name] = $module;
+        }
+      }
+    }
+      
+    return $features;
+  }
+
+  /**
+   * Wrapper function to load only wanted feature.
+   */
+  public static function getInfo($feature_name) {
+    $features = Feature::getInfoAll(FALSE);
+    if (array_key_exists($feature_name, $features)) {
+      return $features[$feature_name];
+    }
+    else {
+      return FALSE;
+    }
+  }
+
+}
+
+/**
+ * Set default variables.
+ */
+function simple_features_set_default_variables($features = array(), $reset = FALSE) {
+  if (empty($features)) {
+    $variables = module_invoke_all('sf_default_variables');
+  }
+  else if (is_string($features)) {
+    $features = array($features);
+  }
+
+  foreach ($features as $feature) {
+    $variables = module_invoke($feature, 'sf_default_variables');
+    if (!is_array($variables)) {
+      continue;
+    }
+    foreach ($variables as $key => $value) {
+      if ($reset || variable_get($key, '') == '') {
+        variable_set($key, $value);
+      }
+    }
+  }
+}
+
+/**
+ * Hook sf_block_settings.
+ */
+function simple_features_set_block_settings($features = array(), $reset = FALSE) {
+  if (empty($features)) {
+    $variables = module_invoke_all('sf_block_settings');
+  }
+  else if (is_string($features)) {
+    $features = array($features);
+  }
+
+  foreach ($features as $feature) {
+    $variables = module_invoke($feature, 'sf_block_settings');
+    // TODO: Refactor
+    foreach ($variables as $key => $value) {
+      foreach ($value as $val) {
+        $block = db_query("
+          SELECT *
+            FROM {block}
+            WHERE module = :module
+            AND delta = :delta",
+          array(
+            ':module' => $val['module'],
+            ':delta' => $val['delta'],
+        ))
+        ->fetch();
+                            
+        $q = db_merge('block')
+          ->fields($val)
+          ->execute();
+      }
     }
   }
 }
