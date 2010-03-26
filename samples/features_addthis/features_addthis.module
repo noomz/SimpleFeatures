@@ -1,0 +1,33 @@
+<?php
+//$Id$
+
+/**
+ * Implements hook_sf_settings().
+ */
+function features_addthis_sf_settings() {
+  $form['username'] = array(
+     '#type' => 'textfield',
+     '#title' => t('AddThis user\'s name'),
+     '#description' => t('If you have one.'),
+  );
+
+  return $form;
+}
+
+/**
+ * Implements hook_sf_settings_submit().
+ */
+function features_addthis_sf_settings_submit($values, &$feature) {
+  variable_set('addthis_username', $values['username']);
+}
+
+/**
+ * Implements hook_sf_default_variables().
+ */
+function features_addthis_sf_default_variables() {
+  return array(
+    'addthis_display_in_links' => 1,
+    'addthis_display_in_teasers' => 1,
+    'addthis_widget_version' => 200,
+  );
+}

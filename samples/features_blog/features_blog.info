@@ -1,0 +1,12 @@
+name = features_blog
+description = Blog content type
+core = 7.x
+version = 7.x-0.1-alpha1
+files[] = features_blog.info
+files[] = features_blog.module
+
+dependencies[] = simple_features
+dependencies[] = blog
+dependencies[] = pathauto
+
+parent = simple_features

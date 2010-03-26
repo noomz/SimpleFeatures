@@ -1,0 +1,14 @@
+name = features_addthis
+description = AddThis Feature Share link
+core = 7.x
+version = 7.x-0.1-alpha1
+package = Share
+files[] = features_addthis.info
+files[] = features_addthis.module
+
+dependencies[] = simple_features
+dependencies[] = addthis
+
+parent = simple_features
+price = 0
+thumbnail = addthis.png

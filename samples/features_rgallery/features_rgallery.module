@@ -1,0 +1,50 @@
+<?php
+// $Id$
+
+/**
+ * hook_image_default_styles() {
+ */
+function features_rgallery_image_default_styles() {
+  $styles = array();
+
+  $styles['rgallery_cover'] = array(
+    'effects' => array(
+      array(
+        'name' => 'image_scale_and_crop',
+        'data' => array('width' => 144, 'height' => 144),
+        'weight' => 0,
+      ),
+    ),
+  );
+  $styles['rgallery_thumbnail'] = array(
+    'effects' => array(
+      array(
+        'name' => 'image_scale',
+        'data' => array('width' => 128, 'height' => 128),
+        'weight' => 0,
+      ),
+    ),
+  );
+  $styles['rgallery_full_view'] = array(
+    'effects' => array(
+      array(
+        'name' => 'image_scale',
+        'data' => array('width' => 600, 'height' => 512),
+        'weight' => 0,
+      ),
+    ),
+  );
+
+  return $styles;
+}
+
+/**
+ * Implements hook_sf_default_variables().
+ */
+function features_rgallery_sf_default_variables() {
+  return array(
+    'rgallery_imagestyle_preview' => 'rgallery_full_view',
+    'rgallery_imagestyle_thumbnail' => 'rgallery_thumbnail',
+    'rgallery_imagestyle_cover' => 'rgallery_cover',
+  );
+}

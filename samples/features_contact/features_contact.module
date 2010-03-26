@@ -1,0 +1,53 @@
+<?php
+// $Id$
+
+/**
+ * Implements hook_sf_settings().
+ */
+function features_contact_sf_settings() {
+  $form['gmap_code'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Google Map Code',
+    '#description' => 'Must be iframe code',
+  );
+
+  return $form;
+}
+
+/**
+ * Implements hook_sf_settings_submit().
+ */
+function features_contact_sf_settings_submit($values, &$feature) {
+  $gmap_code = $values['gmap_code'];
+  $gmap_code = preg_replace('/width\s*=\s*["\']\d+(px|%)?["\']/', 'width="100%"', $gmap_code);
+  $feature->settings['gmap_code'] = $gmap_code;
+  variable_set('gmap_block_block_code', $gmap_code);
+}
+
+/**
+ * Implements hook_sf_block_settings().
+ */
+function features_contact_sf_block_settings() {
+  return array(
+    array(
+      'module' => 'gmap_block',
+      'delta' => 'gmap_block',
+      'theme' => 'garland',
+      'status' => 1,
+      'weight' => -1000,
+      'region' => 'content',
+      'visibility' => 1,
+      'pages' => 'contact',
+    ),
+    array(
+      'module' => 'gmap_block',
+      'delta' => 'gmap_block',
+      'theme' => 'seven',
+      'status' => 1,
+      'weight' => -1000,
+      'region' => 'content',
+      'visibility' => 1,
+      'pages' => 'contact',
+    ),
+  );
+}

@@ -1,0 +1,11 @@
+<?php
+// $Id$
+
+/**
+ * Implements hook_sf_default_variables().
+ */
+function features_blog_sf_default_variables() {
+  return array(
+    'pathauto_node_blog_pattern' => 'blog/[node:title]',
+  );
+}

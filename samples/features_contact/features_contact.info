@@ -1,0 +1,14 @@
+name = features_contact
+description = Contact page with google map shown
+core = 7.x
+version = 7.x-0.1-alpha1
+package = Contact
+files[] = features_contact.info
+files[] = features_contact.module
+
+dependencies[] = simple_features
+dependencies[] = contact
+dependencies[] = gmap_block
+
+parent = simple_features
+price = 20
