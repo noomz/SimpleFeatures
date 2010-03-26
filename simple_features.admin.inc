@@ -46,7 +46,7 @@ function simple_features_list_form() {
         $form[$pkg_name][$module->name]['status']['#suffix'] = '<div><label>Price : </label>'. $module->info['price'] .' Baht</div>';
       }
       else {
-        $form[$pkg_name][$module->name]['status']['#suffix'] = '<div><label>Free</label></div>';
+        $form[$pkg_name][$module->name]['status']['#suffix'] = '<div><label>Price : </label>Free</div>';
       }
 
       if (array_key_exists('thumbnail', $module->info) && $module->info['thumbnail']) {
