@@ -43,10 +43,24 @@ function simple_features_list_form() {
       );
 
       if (array_key_exists('price', $module->info) && $module->info['price']) {
-        $form[$pkg_name][$module->name]['status']['#suffix'] = '<label>Price : </label>'. $module->info['price'] .' Baht';
+        $form[$pkg_name][$module->name]['status']['#suffix'] = '<div><label>Price : </label>'. $module->info['price'] .' Baht</div>';
       }
       else {
-        $form[$pkg_name][$module->name]['status']['#suffix'] = '<label>Free</label>';
+        $form[$pkg_name][$module->name]['status']['#suffix'] = '<div><label>Free</label></div>';
+      }
+
+      if (array_key_exists('thumbnail', $module->info) && $module->info['thumbnail']) {
+        $path = drupal_get_path('module', $module->name) .'/'. $module->info['thumbnail'];
+        $form[$pkg_name][$module->name]['thumbnail'] = array(
+          '#type' => 'fieldset',
+          '#title' => 'Thumbnail',
+          '#collapsible' => TRUE,
+          '#collapsed' => TRUE,
+        );
+        $form[$pkg_name][$module->name]['thumbnail']['thumb'] = array(
+          '#type' => 'markup',
+          '#markup' => '<div>'. theme('image', array('path' => $path)) .'</div>',
+        );
       }
 
       if ($module->status == 1 && in_array($module->name, $implemented_modules)) {
