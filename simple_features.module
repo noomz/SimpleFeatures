@@ -34,6 +34,12 @@ function simple_features_menu() {
     'file' => 'simple_features.admin.inc',
   );
 
+  $items['admin/features/list'] = array(
+    'title' => t('List'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+
   return $items;
 }
 
@@ -194,24 +200,58 @@ function simple_features_set_block_settings($features = array(), $reset = FALSE)
 
   foreach ($features as $feature) {
     $variables = module_invoke($feature, 'sf_block_settings');
+    if (empty($variables)) {
+      continue;
+    }
     // TODO: Refactor
     foreach ($variables as $key => $value) {
-      foreach ($value as $val) {
-        $block = db_query("
-          SELECT *
-            FROM {block}
-            WHERE module = :module
-            AND delta = :delta",
-          array(
-            ':module' => $val['module'],
-            ':delta' => $val['delta'],
+      $q = db_merge('block')
+        ->key(array(
+          'module' => $value['module'],
+          'delta' => $value['delta'],
         ))
-        ->fetch();
-                            
-        $q = db_merge('block')
-          ->fields($val)
-          ->execute();
+        ->fields($value);
+      if ($reset) {
+        $q->update($value);
       }
+      $q->execute();
     }
+  }
+}
+
+/**
+ * Helper function to disable features.
+ */
+function simple_features_disable_features($disabled) {
+  // Prevent itself to be disabled.
+  unset($disabled[array_search('simple_features', $disabled)]);
+  module_disable($disabled);
+}
+
+/**
+ * Helper function to enable features.
+ */
+function simple_features_enable_features($enabled) {
+  module_enable($enabled);
+  simple_features_set_default_variables($enabled);
+  simple_features_set_block_settings($enabled, TRUE);
+}
+
+/**
+ * Safe transaction wrapper.
+ */
+function _txn($func_name) {
+  $args = func_get_args();
+  array_shift($args);
+
+  $txn = db_transaction();
+  try {
+    $result = call_user_func_array($func_name, $args);
+    return $result;
+  }
+  catch (Exception $e) {
+    $txn->rollback();
+    drupal_set_message('An error occurs, please check and try again', 'error');
+    return FALSE;
   }
 }

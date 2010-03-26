@@ -42,6 +42,13 @@ function simple_features_list_form() {
         '#default_value' => $module->status,
       );
 
+      if (array_key_exists('price', $module->info) && $module->info['price']) {
+        $form[$pkg_name][$module->name]['status']['#suffix'] = '<label>Price : </label>'. $module->info['price'] .' Baht';
+      }
+      else {
+        $form[$pkg_name][$module->name]['status']['#suffix'] = '<label>Free</label>';
+      }
+
       if ($module->status == 1 && in_array($module->name, $implemented_modules)) {
         $form[$pkg_name][$module->name]['settings'] = array(
           '#type' => 'fieldset',
@@ -69,6 +76,7 @@ function simple_features_list_form() {
     '#type' => 'submit',
     '#value' => 'Save',
   );
+  $form['#attached']['css'][] = drupal_get_path('module', 'simple_features') . '/simple_features.css';
 
   $form['#pre_render'][] = 'vertical_tabs_form_pre_render';
 
@@ -98,14 +106,13 @@ function simple_features_list_form_submit($form, &$form_state) {
     }
     if (array_key_exists('settings', $value)) {
       $feature->settings = $value['settings'];
+      module_invoke($key, 'sf_settings_submit', $value['settings'], $feature);
       $feature->save_settings();
-      module_invoke($key, 'sf_settings_submit', $value['settings']);
     }
   }
 
-  module_disable($disabled);
-  module_enable($enabled);
-  simple_features_set_default_variables($enabled);
+  _txn('simple_features_disable_features' ,$disabled);
+  _txn('simple_features_enable_features', $enabled);
   if (!empty($disabled) || !empty($enabled)) {
     drupal_flush_all_caches();
   }

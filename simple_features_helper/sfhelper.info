@@ -1,0 +1,10 @@
+name = Simple Features Helper
+description = Contain many utility like content type export.
+core = 7.x
+version = 7.x-0.1-alpha1
+package = "Simple Features"
+files[] = sfhelper.info
+files[] = sfhelper.module
+files[] = sfhelper.admin.inc
+
+dependencies[] = simple_features

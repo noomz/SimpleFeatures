@@ -1,0 +1,58 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ */
+
+/**
+ * Implement hook_permission().
+ */
+function sfhelper_permission() {
+  return array(
+    'export content type' => array(
+      'title' => 'Export content type',
+      'description' => 'Export any content type to be use with simple_features.',
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function sfhelper_menu() {
+  $items['admin/features/export'] = array(
+    'title' => t('Export Content Type'),
+    'page callback' => 'sfhelper_export',
+    'access arguments' => array('export content type'),
+    'file' => 'sfhelper.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['admin/features/export/%node_type'] = array(
+    'title' => t('Content Type Information'),
+    'page callback' => 'sfhelper_export',
+    'page arguments' => array(3),
+    'access arguments' => array('export content type'),
+    'file' => 'sfhelper.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function sfhelper_theme($existing, $type, $theme, $path) {
+  return array(
+    'sfhelper_node_type_list' => array(
+      'variables' => array('node_types' => NULL),
+      'file' => 'sfhelper.admin.inc',
+    ),
+    'sfhelper_node_type_item' => array(
+      'variables' => array('info' => NULL),
+      'file' => 'sfhelper.admin.inc',
+    ),
+  );
+}

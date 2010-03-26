@@ -1,0 +1,8 @@
+div.vertical-tabs .vertical-tabs-panes fieldset.vertical-tabs-pane fieldset > legend {
+  display: block;
+}
+
+div.vertical-tabs .vertical-tabs-panes fieldset.vertical-tabs-pane fieldset fieldset {
+  padding: 30px 10px 10px 20px;
+  margin-right: 20px;
+}

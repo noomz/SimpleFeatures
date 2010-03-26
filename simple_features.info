@@ -1,10 +1,11 @@
 name = Simple Features
 description = Features module for drupal 7 with minimal feature.
 core = 7.x
-package = "Features"
+package = "Simple Features"
 files[] = "simple_features.info"
 files[] = "simple_features.module"
 files[] = "simple_features.admin.inc"
+files[] = "simple_features.css"
 
 configure = admin/config/system/features
 
