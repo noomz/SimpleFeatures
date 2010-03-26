@@ -9,3 +9,4 @@ dependencies[] = simple_features
 dependencies[] = rgallery
 
 parent = simple_features
+thumbnail = rutcreate.png
