@@ -1,5 +1,5 @@
-name = features_contact
-description = Contact page with google map shown
+name = Contact
+description = Contact site-wide page with google maps iframe supported.
 core = 7.x
 version = 7.x-0.1-alpha1
 package = Contact

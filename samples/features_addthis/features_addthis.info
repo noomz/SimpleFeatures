@@ -1,5 +1,5 @@
-name = features_addthis
-description = AddThis Feature Share link
+name = AddThis Button
+description = AddThis Button Share link, share your web to the world easily.
 core = 7.x
 version = 7.x-0.1-alpha1
 package = Share
@@ -11,4 +11,4 @@ dependencies[] = addthis
 
 parent = simple_features
 price = 0
-thumbnail = addthis.png
+preview_image = addthis.png

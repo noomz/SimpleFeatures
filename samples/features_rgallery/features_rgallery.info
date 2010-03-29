@@ -1,5 +1,5 @@
-name = features_rgallery
-description = Most Advanced Gallery over 3 worlds
+name = Gallery
+description = Easy gallery for everyone.
 core = 7.x
 version = 7.x-0.1-alpha1
 files[] = features_rgallery.info
@@ -9,4 +9,4 @@ dependencies[] = simple_features
 dependencies[] = rgallery
 
 parent = simple_features
-thumbnail = rutcreate.png
+preview_image = rutcreate.png

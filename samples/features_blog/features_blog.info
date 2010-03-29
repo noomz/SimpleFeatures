@@ -1,5 +1,5 @@
-name = features_blog
-description = Blog content type
+name = Blog
+description = Blog content type for all user, see how your user do in their blog updates.
 core = 7.x
 version = 7.x-0.1-alpha1
 files[] = features_blog.info

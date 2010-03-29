@@ -255,3 +255,40 @@ function _txn($func_name) {
     return FALSE;
   }
 }
+
+/**
+ * Implements hook_theme().
+ */
+function simple_features_theme($existing, $type, $theme, $path) {
+  return array(
+    'simple_features_checkbox_element' => array(
+      'render element' => 'element',
+      'file' => 'simple_features.admin.inc',
+    ),
+    'simple_features_preview_image' => array(
+      'variables' => array('path' => NULL, 'width' => 194, 'height' => 144),
+      'file' => 'simple_features.admin.inc',
+    ),
+    'simple_features_price' => array(
+      'variables' => array('price' => NULL),
+      'file' => 'simple_features.admin.inc',
+    ),
+  );
+}
+
+/**
+ * Implements hook_image_default_style().
+ */
+function simple_features_image_default_styles() {
+  $styles['simple_features_preview'] = array(
+    'effects' => array(
+      array(
+        'name' => 'image_scale_and_crop',
+        'data' => array('width' => 294, 'height' => 219),
+        'weight' => 0,
+      ),
+    ),
+  );
+
+  return $styles;
+}

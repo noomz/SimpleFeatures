@@ -6,3 +6,21 @@ div.vertical-tabs .vertical-tabs-panes fieldset.vertical-tabs-pane fieldset fiel
   padding: 30px 10px 10px 20px;
   margin-right: 20px;
 }
+
+div.features-checkbox, div.features-preview, div.features-detail {
+  display: block;
+  float: left;
+}
+
+div.features-detail > div.description {
+  margin-left: 0px !important;
+}
+
+div.features-preview {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+div.features-price {
+  margin-top: 10px;
+}

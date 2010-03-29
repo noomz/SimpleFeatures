@@ -37,31 +37,24 @@ function simple_features_list_form() {
 
       $form[$pkg_name][$module->name]['status'] = array(
         '#type' => 'checkbox',
-        '#title' => $module->info['description'] .' ['. $module->info['name'] .']',
+        '#title' => $module->info['name'],
+        '#description' => $module->info['description'],
         '#tree' => TRUE,
         '#default_value' => $module->status,
+        '#theme_wrappers' => array('simple_features_checkbox_element'),
       );
 
-      if (array_key_exists('price', $module->info) && $module->info['price']) {
-        $form[$pkg_name][$module->name]['status']['#suffix'] = '<div><label>Price : </label>'. $module->info['price'] .' Baht</div>';
+      // Check for preview image
+      if (!$module->info['preview_image']) {
+        $path = drupal_get_path('module', 'simple_features') . '/preview-default.png';
       }
       else {
-        $form[$pkg_name][$module->name]['status']['#suffix'] = '<div><label>Price : </label>Free</div>';
+        $path = drupal_get_path('module', $module->name) .'/'. $module->info['preview_image'];
       }
+      $form[$pkg_name][$module->name]['status']['#preview_image'] = $path;
 
-      if (array_key_exists('thumbnail', $module->info) && $module->info['thumbnail']) {
-        $path = drupal_get_path('module', $module->name) .'/'. $module->info['thumbnail'];
-        $form[$pkg_name][$module->name]['thumbnail'] = array(
-          '#type' => 'fieldset',
-          '#title' => 'Thumbnail',
-          '#collapsible' => TRUE,
-          '#collapsed' => TRUE,
-        );
-        $form[$pkg_name][$module->name]['thumbnail']['thumb'] = array(
-          '#type' => 'markup',
-          '#markup' => '<div>'. theme('image', array('path' => $path)) .'</div>',
-        );
-      }
+      // Add price information
+      $form[$pkg_name][$module->name]['status']['#price'] = $module->info['price'];
 
       if ($module->status == 1 && in_array($module->name, $implemented_modules)) {
         $form[$pkg_name][$module->name]['settings'] = array(
@@ -130,4 +123,82 @@ function simple_features_list_form_submit($form, &$form_state) {
   if (!empty($disabled) || !empty($enabled)) {
     drupal_flush_all_caches();
   }
+}
+
+/**
+ * Theme form element.
+ */
+function theme_simple_features_checkbox_element($variables) {
+  $element = $variables['element'];
+  // This is also used in the installer, pre-database setup.
+  $t = get_t();
+
+  // Add element's #type and #name as class to aid with JS/CSS selectors.
+  $class = array('form-item');
+  if (!empty($element['#type'])) {
+    $class[] = 'form-type-' . strtr($element['#type'], '_', '-');
+  }
+  if (!empty($element['#name'])) {
+    $class[] = 'form-item-' . strtr($element['#name'], array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
+  }
+
+  // If #title is not set, we don't display any label or required marker.
+  if (!isset($element['#title'])) {
+    $element['#title_display'] = 'none';
+  }
+
+  $output .= '<div class="' . implode(' ', $class) . '">' . "\n";
+
+  $output .= ' <div class="features-checkbox">';
+  $output .= ' ' . $element['#children'];
+  $output .= " </div>\n";
+  
+  // Add preview image.
+  $output .= theme('simple_features_preview_image', array('path' => $element['#preview_image'], 'width' => 194, 'height' => 144));
+
+  // Add more details.
+  $output .= '  <div class="features-detail">';
+  $output .= '  ' . theme('form_element_label', $variables) . "\n";
+
+  if (!empty($element['#description'])) {
+    $output .= '  <div class="description">' . $element['#description'] . "</div>\n";
+  }
+
+  // Print price.
+  $output .= theme('simple_features_price', array('price' => $element['#price']));
+
+  $output .= "  </div>\n";
+  $output .= "</div>\n";
+
+  return $output;
+}
+
+/**
+ * Theme preview image.
+ */
+function theme_simple_features_preview_image($variables) {
+  $path = $variables['path'];
+  $width = $variables['width'];
+  $height = $variables['height'];
+
+  drupal_set_message($path, 'error');
+  $output = '<div class="features-preview">';
+  $output .= theme('image', array('path' => $path, 'attributes' => array('width' => $width, 'height' => $height), 'getsize' => FALSE));
+  $output .= "</div>\n";
+
+  return $output;
+}
+
+/**
+ * Theme price.
+ */
+function theme_simple_features_price($variables) {
+  $price = $variables['price'];
+  $output = '<div class="features-price">';
+  $output .= '<span class="features-price-label">Price : </span>';
+  $output .= '<span class="features-price-value">';
+  $output .= $price ? $price . ' Baht' : 'FREE' ;
+  $output .= "</span></div>\n";
+
+  return $output;
 }
