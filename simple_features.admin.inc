@@ -56,6 +56,14 @@ function simple_features_list_form() {
       // Add price information
       $form[$pkg_name][$module->name]['status']['#price'] = $module->info['price'];
 
+      // Add sample link if module is enabled.
+      $sample_contents = module_invoke($module->name, 'sf_sample_contents');
+      foreach ($sample_contents as $content) {
+        if (isset($content['#link'])) {
+          $form[$pkg_name][$module->name]['status']['#sample_links'][] = $content['#link'];
+        }
+      }
+
       // If module is enabled, show settings form.
       if ($module->status == 1 && in_array($module->name, $implemented_modules)) {
         $form[$pkg_name][$module->name]['settings'] = array(
@@ -174,6 +182,9 @@ function theme_simple_features_checkbox_element($variables) {
   // Print price.
   $output .= theme('simple_features_price', array('price' => $element['#price']));
 
+  // Sample content links.
+  $output .= theme('simple_features_sample_links', array('links' => $element['#sample_links']));
+
   $output .= "  </div>\n";
   $output .= "</div>\n";
 
@@ -205,6 +216,26 @@ function theme_simple_features_price($variables) {
   $output .= '<span class="features-price-value">';
   $output .= $price ? $price . ' Baht' : 'FREE' ;
   $output .= "</span></div>\n";
+
+  return $output;
+}
+
+/**
+ * Theme sample links.
+ */
+function theme_simple_features_sample_links($variables) {
+  $links = $variables['links'];
+  $output = '';
+  if (!empty($links)) {
+    $output .= '<div class="features-links">';
+    $output .= '<h4>Content Sample Links</h4>';
+    $output .= '<ul>';
+    foreach ($links as $link) {
+      $output .= '<li>' . $link . '</li>';
+    }
+    $output .= '</ul>';
+    $output .= "</div>\n";
+  }
 
   return $output;
 }

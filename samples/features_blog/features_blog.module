@@ -9,3 +9,47 @@ function features_blog_sf_default_variables() {
     'pathauto_node_blog_pattern' => 'blog/[node:title]',
   );
 }
+
+/**
+ * Implements hook_sf_default_permissions().
+ */
+function features_blog_sf_default_permissions() {
+  return array(
+    'authenticated user' => array(
+      'create blog content' => 1,
+      'edit own blog content' => 1,
+      'edit any blog content' => 0,
+      'delete own blog content' => 1,
+      'delete any blog content' => 0,
+    ),
+    'administrator' => array(
+      'create blog content' => 1,
+      'edit own blog content' => 1,
+      'edit any blog content' => 1,
+      'delete own blog content' => 1,
+      'delete any blog content' => 1,
+    ),
+  );
+}
+
+/**
+ * Implements hook_sf_sample_contents().
+ */
+function features_blog_sf_sample_contents() {
+  $node = array(
+    'type' => 'blog',
+    'title' => t('Example blog'),
+    'body' => array(
+      'und' => array(
+        0 => array(
+          'value' => 'This is an example blog, you can <a href="node/add/blog">add new blog</a>, or view all blog or even view each user blogs',
+          'format' => 1,
+        ),
+      ),
+    ),
+    '#link' => l('Blogs Page', 'blog'),
+  );
+  $node['#hash'] = md5(serialize($node));
+
+  return array($node);
+}
