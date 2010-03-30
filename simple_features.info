@@ -4,6 +4,7 @@ core = 7.x
 package = "Simple Features"
 files[] = "simple_features.info"
 files[] = "simple_features.module"
+files[] = "simple_features.class.inc"
 files[] = "simple_features.admin.inc"
 files[] = "simple_features.css"
 

@@ -147,7 +147,7 @@ function theme_simple_features_checkbox_element($variables) {
     $element['#title_display'] = 'none';
   }
 
-  $output .= '<div class="' . implode(' ', $class) . '">' . "\n";
+  $output = '<div class="' . implode(' ', $class) . '">' . "\n";
 
   $output .= ' <div class="features-checkbox">';
   $output .= ' ' . $element['#children'];
@@ -181,7 +181,6 @@ function theme_simple_features_preview_image($variables) {
   $width = $variables['width'];
   $height = $variables['height'];
 
-  drupal_set_message($path, 'error');
   $output = '<div class="features-preview">';
   $output .= theme('image', array('path' => $path, 'attributes' => array('width' => $width, 'height' => $height), 'getsize' => FALSE));
   $output .= "</div>\n";

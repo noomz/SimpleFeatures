@@ -12,8 +12,12 @@ div.features-checkbox, div.features-preview, div.features-detail {
   float: left;
 }
 
-div.features-detail > div.description {
-  margin-left: 0px !important;
+.features-detail > .description {
+  margin-left: 0px;
+}
+
+label.option {
+  font-weight: bolder;
 }
 
 div.features-preview {
