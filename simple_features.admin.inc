@@ -44,7 +44,7 @@ function simple_features_list_form() {
         '#theme_wrappers' => array('simple_features_checkbox_element'),
       );
 
-      // Check for preview image
+      // Check for preview image, use default if not provides
       if (!$module->info['preview_image']) {
         $path = drupal_get_path('module', 'simple_features') . '/preview-default.png';
       }
@@ -56,6 +56,7 @@ function simple_features_list_form() {
       // Add price information
       $form[$pkg_name][$module->name]['status']['#price'] = $module->info['price'];
 
+      // If module is enabled, show settings form.
       if ($module->status == 1 && in_array($module->name, $implemented_modules)) {
         $form[$pkg_name][$module->name]['settings'] = array(
           '#type' => 'fieldset',
@@ -83,9 +84,9 @@ function simple_features_list_form() {
     '#type' => 'submit',
     '#value' => 'Save',
   );
-  $form['#attached']['css'][] = drupal_get_path('module', 'simple_features') . '/simple_features.css';
 
   $form['#pre_render'][] = 'vertical_tabs_form_pre_render';
+  $form['#attached']['css'][] = drupal_get_path('module', 'simple_features') . '/simple_features.css';
 
   return $form;
 }
@@ -108,6 +109,10 @@ function simple_features_list_form_submit($form, &$form_state) {
       }
       else {
         $disabled[] = $key;
+        // Disable all dependencied modules, then blog will not be use if
+        // features_blog.module is disabled.
+        // TODO: Option to disable dependencies or not, Or provide new
+        // TODO: configuration 'strong_dependencies', FYI.
         $disabled = array_merge($disabled, $feature->info->info['dependencies']);
       }
     }
@@ -118,6 +123,7 @@ function simple_features_list_form_submit($form, &$form_state) {
     }
   }
 
+  // TODO: Check if this approach really works.
   _txn('simple_features_disable_features' ,$disabled);
   _txn('simple_features_enable_features', $enabled);
   if (!empty($disabled) || !empty($enabled)) {
@@ -127,6 +133,7 @@ function simple_features_list_form_submit($form, &$form_state) {
 
 /**
  * Theme form element.
+ * Override default theme_checkbox_element.
  */
 function theme_simple_features_checkbox_element($variables) {
   $element = $variables['element'];
@@ -152,7 +159,7 @@ function theme_simple_features_checkbox_element($variables) {
   $output .= ' <div class="features-checkbox">';
   $output .= ' ' . $element['#children'];
   $output .= " </div>\n";
-  
+
   // Add preview image.
   $output .= theme('simple_features_preview_image', array('path' => $element['#preview_image'], 'width' => 194, 'height' => 144));
 
