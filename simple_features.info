@@ -8,6 +8,6 @@ files[] = "simple_features.class.inc"
 files[] = "simple_features.admin.inc"
 files[] = "simple_features.css"
 
-configure = admin/config/system/features
+configure = admin/features
 
 version = "7.x-0.1-alpha"
