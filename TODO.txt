@@ -5,3 +5,12 @@
 - Test db transaction method if it works
 - Option to disable dependencies for enabled modules or not
 - Prepare sample contents for features_rgallery
+- Detach sample contents link to something like sf_links for showing related
+  links to that feature.
+- [D7A1-D7A2] Re-code module enable/disable section, @see system_modules_submit in
+  modules/system/system.admin.inc
+- Eliminate all notice and warning messages.
+- Show individual form(detach from admin page) on overlay.
+
+REMARKS
+- D7A1 means Drupal 7 Alpha 1

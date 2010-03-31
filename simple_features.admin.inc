@@ -113,6 +113,7 @@ function simple_features_list_form_submit($form, &$form_state) {
     if ($feature->status != $value['status']) {
       if ($value['status'] == 1) {
         $enabled[] = $key;
+        $enabled = array_merge($enabled, $feature->info->info['dependencies']);
         continue;
       }
       else {
@@ -132,11 +133,9 @@ function simple_features_list_form_submit($form, &$form_state) {
   }
 
   // TODO: Check if this approach really works.
-  _txn('simple_features_disable_features' ,$disabled);
-  _txn('simple_features_enable_features', $enabled);
-  if (!empty($disabled) || !empty($enabled)) {
-    drupal_flush_all_caches();
-  }
+  $clear_cache = !empty($disabled) || !empty($enabled);
+  _txn('simple_features_disable_features' ,$disabled, FALSE);
+  _txn('simple_features_enable_features', $enabled, $clear_cache);
 }
 
 /**
