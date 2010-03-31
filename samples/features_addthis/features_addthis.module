@@ -31,3 +31,17 @@ function features_addthis_sf_default_variables() {
     'addthis_widget_version' => 200,
   );
 }
+
+/**
+ * Implements hook_sf_default_permissions().
+ */
+function features_addthis_sf_default_permissions() {
+  return array(
+    'anonymous user' => array(
+      'view addthis' => 1,
+    ),
+    'authenticated user' => array(
+      'view addthis' => 1,
+    ),
+  );
+}

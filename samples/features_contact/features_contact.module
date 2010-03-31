@@ -51,3 +51,28 @@ function features_contact_sf_block_settings() {
     ),
   );
 }
+
+/**
+ * Implements hook_sf_default_permissions().
+ */
+function features_contact_sf_default_permissions() {
+  return array(
+    'anonymous user' => array(
+      'access site-wide contact form' => 1,
+      'access user contact forms' => 0,
+    ),
+    'authenticated user' => array(
+      'access site-wide contact form' => 1,
+      'access user contact forms' => 0,
+    ),
+  );
+}
+
+/**
+ * Implements hook_sf_default_variables().
+ */
+function features_contact_sf_default_variables() {
+  return array(
+    'gmap_block_block_code' => 'Go to <a href="http://maps.google.com">Google Maps Site</a> and set your decided location, then copy share code that is an iframe and paste to form settings',
+  );
+}
