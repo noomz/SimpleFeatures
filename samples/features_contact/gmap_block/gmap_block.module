@@ -1,0 +1,51 @@
+<?php
+//$Id$
+
+/**
+ * @file
+ */
+
+/**
+ * Implement hook_block_info().
+ */
+function gmap_block_block_info() {
+  $blocks['gmap_block'] = array(
+    'info' => t('Google Maps Block'),
+    'weight' => 0,
+    'status' => 1,
+    'region' => 'content',
+  );
+  return $blocks;
+}
+
+/**
+ * Implement hook_block_configure().
+ */
+function gmap_block_block_configure($delta = '') {
+  $form['code'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Maps'),
+    '#default_value' => variable_get('gmap_block_block_code', ''),
+  );
+
+  return $form;
+}
+
+/**
+ * Implement hook_block_save().
+ */
+function gmap_block_block_save($delta = '', $edit = array()) {
+  variable_set('gmap_block_block_code', $edit['code']);
+}
+
+/**
+ * Implement hook_block_view().
+ */
+function gmap_block_block_view($delta = '', $edit = array()) {
+  $maps = variable_get('gmap_block_block_code', '');
+  $block = array(
+    'subject' => t('Maps'),
+    'content' => $maps,
+  );
+  return $block;
+}

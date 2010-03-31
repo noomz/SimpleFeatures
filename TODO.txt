@@ -1,0 +1,7 @@
+== 2010-03-31 ==
+- Fix css on admin page
+- Show dependencies on admin page for only the greatest administrator
+- Add function to retore default settings
+- Test db transaction method if it works
+- Option to disable dependencies for enabled modules or not
+- Prepare sample contents for features_rgallery

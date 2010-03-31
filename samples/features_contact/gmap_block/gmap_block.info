@@ -1,0 +1,7 @@
+;$Id$
+name = Google Map Block
+description = Display google maps block
+core = 7.x
+version = 7.x-0.1
+files[] = "gmap_block.info"
+files[] = "gmap_block.module"
