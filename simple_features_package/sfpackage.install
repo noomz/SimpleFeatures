@@ -1,0 +1,32 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function sfpackage_schema() {
+  $schema['sf_package'] = array(
+    'description' => 'Store feature into package node',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'Package node id',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'feature' => array(
+        'description' => 'Feature machine name',
+        'type' => 'varchar',
+        'size' => 'normal',
+        'not null' => TRUE,
+        'length' => 255,
+      ),
+    ),
+    'primary key' => array('nid', 'feature'),
+  );
+
+  return $schema;
+}

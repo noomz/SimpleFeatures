@@ -88,17 +88,27 @@ class Feature {
    * @param $group
    *   if TRUE return features group by category(package)
    */
-  public static function getInfoAll($group = TRUE) {
+  public static function getInfoAll($group = TRUE, $field = NULL) {
     $features = array();
     $modules = db_query("SELECT * FROM {system} WHERE type = 'module'")->fetchAll();
     foreach ($modules as &$module) {
       $module->info = unserialize($module->info);
       if (@$module->info['parent'] == 'simple_features') {
+        
+        // Expland to depthest field, split by :
+        $_module = $module;
+        if ($field) {
+          foreach (explode(':', $field) as $depfield) {
+            $_module = (array) $_module;
+            $_module = $_module[$depfield];
+          }
+        }
+
         if ($group) {
-          $features[$module->info['package']][] = $module;
+          $features[$module->info['package']][] = $_module;
         }
         else {
-          $features[$module->name] = $module;
+          $features[$module->name] = $_module;
         }
       }
     }

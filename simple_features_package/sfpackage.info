@@ -1,0 +1,9 @@
+name = Simple Features Package 
+description = Package for user select feature easier.
+core = 7.x
+version = 7.x-0.1-alpha1
+package = "Simple Features"
+files[] = sfpackage.info
+files[] = sfpackage.module
+
+dependencies[] = simple_features

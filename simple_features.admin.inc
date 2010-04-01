@@ -58,9 +58,11 @@ function simple_features_list_form() {
 
       // Add sample link if module is enabled.
       $sample_contents = module_invoke($module->name, 'sf_sample_contents');
-      foreach ($sample_contents as $content) {
-        if (isset($content['#link'])) {
-          $form[$pkg_name][$module->name]['status']['#sample_links'][] = $content['#link'];
+      if (!empty($sample_contents)) { 
+        foreach ($sample_contents as $content) {
+          if (isset($content['#link'])) {
+            $form[$pkg_name][$module->name]['status']['#sample_links'][] = $content['#link'];
+          }
         }
       }
 

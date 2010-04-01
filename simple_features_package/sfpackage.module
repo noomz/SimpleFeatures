@@ -1,0 +1,136 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ */
+
+/**
+ * Implement hook_permission().
+ */
+function sfhelper_permission() {
+  return array(
+    'select package' => array(
+      'title' => 'Select package',
+      'description' => 'Select package with simple feature.',
+    ),
+    'create package' => array(
+      'title' => 'Create package',
+      'description' => 'Create package node.',
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function sfpackage_menu() {
+  $items['admin/package'] = array(
+    'title' => t('Select package'),
+    'page callback' => 'sfpackage_select',
+    'access arguments' => array('select package'),
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function sfpackage_theme($existing, $type, $theme, $path) {
+  return array(
+    'sfpackage_select' => array(
+      'variables' => array('packages' => NULL),
+      'file' => 'sfpackage.tpl.php',
+    ),
+  );
+}
+
+/**
+ * Implement hook_node_info().
+ */
+function sfpackage_node_info() {
+  return array(
+    'package' => array(
+      'name' => t('Package'),
+      'base' => 'sfpackage_package',
+      'description' => t("Package for user select feature easier."),
+      'has_title' => TRUE,
+      'title_label' => t('Package name'),
+      'has_body' => FALSE,
+      'body_label' => t('Package description'),
+    ),
+  );
+}
+
+/**
+ * Implement hook_form().
+ */
+function sfpackage_package_form($node, &$form_state) {
+  $options = Feature::getInfoAll(FALSE, 'info:name');
+  ksort($options);
+  $keyname = array_keys($node->features);
+  $default = $node->features? array_merge($keyname, $keyname): array();
+  $form = node_content_form($node, $form_state);
+  $form['features'] = array(
+    '#title' => t('Select features'),
+    '#type' => 'checkboxes', 
+    '#options' => $options,
+    '#default_value' => $default,
+  );
+  return $form;
+}
+
+/**
+ * Implement hook_load().
+ */
+function sfpackage_package_load($nodes) {
+  $features_info = Feature::getInfoAll(FALSE, 'info:name');
+  ksort($features_info);
+  foreach ($nodes as &$node) {
+    $features = db_query("SELECT feature FROM {sf_package} WHERE nid = :nid", array(':nid' => $node->nid))->fetchCol();
+    $features = array_intersect_key($features_info, array_flip($features));
+    $node->features = $features;
+  }
+}
+
+/**
+ * Implement of hook_insert().
+ */
+function sfpackage_package_insert($node) {
+  foreach (array_filter($node->features) as $feature) {
+    db_insert('sf_package')
+      ->fields(array(
+        'nid' => $node->nid,
+        'feature' => $feature,
+      ))
+      ->execute();
+  }
+}
+
+/**
+ * Implement of hook_update().
+ */
+function sfpackage_package_update($node) {
+  sfpackage_package_delete($node);
+  sfpackage_package_insert($node);
+}
+
+/**
+ * Implement of hook_delete().
+ */
+function sfpackage_package_delete($node) {
+   db_delete('sf_package')
+     ->condition('nid', $node->nid)
+     ->execute();
+ }
+
+/**
+ * Implement of hook_view().
+ */
+function sfpackage_package_view($node) {
+  $node->content['body'][0]['#markup'] = '<h4>List of features depend on this package</h4>'.theme('item_list', array('items' => $node->features));
+  return $node;
+}
+
