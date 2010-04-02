@@ -8,15 +8,11 @@
 /**
  * Implement hook_permission().
  */
-function sfhelper_permission() {
+function sfpackage_permission() {
   return array(
     'select package' => array(
       'title' => 'Select package',
       'description' => 'Select package with simple feature.',
-    ),
-    'create package' => array(
-      'title' => 'Create package',
-      'description' => 'Create package node.',
     ),
   );
 }
@@ -29,10 +25,22 @@ function sfpackage_menu() {
     'title' => t('Select package'),
     'page callback' => 'sfpackage_select',
     'access arguments' => array('select package'),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_NORMAL_ITEM,
   );
 
   return $items;
+}
+
+function sfpackage_select() {
+  $packages = db_query("SELECT nid, title FROM {node} WHERE type = :type", array(':type' => 'package'));
+  foreach($packages as $package) {
+    $content = '<div>';
+    $content .= '<h5>'.$package->title.'</h5>';
+    $content .= '</div>';
+
+    $contents[] = $content;
+  }
+  return theme('item_list', array('items' => $contents));
 }
 
 /**
@@ -51,6 +59,7 @@ function sfpackage_theme($existing, $type, $theme, $path) {
  * Implement hook_node_info().
  */
 function sfpackage_node_info() {
+  variable_set('comment_package', COMMENT_NODE_CLOSED);
   return array(
     'package' => array(
       'name' => t('Package'),
