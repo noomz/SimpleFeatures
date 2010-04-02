@@ -71,3 +71,64 @@ function features_rgallery_sf_default_permissions() {
     ),
   );
 }
+
+/**
+ * Implements hook_sf_sample_contents().
+ */
+function features_rgallery_sf_sample_contents() {
+  // Album
+  if (!variable_get('was_added_example_features_rgallery', FALSE)) {
+    $album = new stdClass();
+    $album->type = 'ralbum';
+    $album->title = t('Example Album');
+    $album->privacy = 1;
+    $album->uid = 1;
+    node_save($album);
+    drupal_set_message('add new album#'.$album->nid);
+    if ($album->nid) {
+      // Photo
+      $uploadpath = rgallery_album_uri($album->nid);
+      $filepath = drupal_get_path('module', 'features_rgallery') .'/rutcreate.png';
+      $filename = basename($filepath);
+      $source = new stdClass();
+      $source->uri = $filepath;
+      $source->uid = 1;
+      $source->filemime = file_get_mimetype(trim(basename($filename), '.'));
+      if ($file = file_copy($source, $uploadpath, FILE_EXISTS_RENAME)) {
+        drupal_set_message('add new file#'.$file->fid);
+        $photo = new stdClass();
+        $photo->title = $file->filename;
+        $photo->type = 'rphoto';
+        $photo->body[LANGUAGE_NONE][0] = array(
+          'value' => $file->filename,
+          'format' => 1,
+        );
+        $photo->uid = $GLOBALS['user']->uid;
+        $photo->name = $GLOBALS['user']->name;
+        $photo->status = 1;
+        $photo->promote = 0;
+        if (module_exists('comment')) {
+          $photo->comment = variable_get('comment_'. $photo->type, COMMENT_NODE_OPEN);
+        }
+        node_save($photo);
+        drupal_set_message('add new photo#'.$photo->nid);
+        if ($photo->nid) {
+          $last_weight = db_query("SELECT weight FROM {ralbum} WHERE aid = :aid ORDER BY weight DESC", array(':aid' => $album->nid))->fetchCol();
+          $weight = 0;
+          if (!empty($last_weight)) $weight = $last_weight[0] + 1;
+          $is_thumbnail = ($weight == 0) ? 1 : 0;
+          db_insert('ralbum')
+            ->fields(array(
+              'aid' => $album->nid,
+              'pid' => $photo->nid,
+              'fid' => $file->fid,
+              'weight' => $weight,
+              'is_thumbnail' => $is_thumbnail
+            ))
+            ->execute();
+        }
+      }
+    }
+  }
+  return array(array('#saved' => TRUE, '#link' => l(t('Gallery page'), 'mygallery')));
+}
