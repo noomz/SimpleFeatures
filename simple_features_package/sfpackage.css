@@ -1,0 +1,22 @@
+ul.package-select li {
+  float: left;
+  position: relative;
+  margin: 0 20px 0 20px !important;
+  list-style-type: none !important;
+}
+
+ul.package-select li .package-layer {
+  background-color: #000000;
+  bottom:6px;
+  position:absolute;
+  width:100%;
+  opacity: 0.7;
+}
+
+ul.package-select li .package-name {
+  color:#CCCCCC;
+  font-size:110%;
+  font-weight:bold;
+  float: right;
+  margin-right:5px;
+}

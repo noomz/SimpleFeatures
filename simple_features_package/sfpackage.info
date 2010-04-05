@@ -5,5 +5,7 @@ version = 7.x-0.1-alpha1
 package = "Simple Features"
 files[] = sfpackage.info
 files[] = sfpackage.module
+files[] = sfpackage.install
+files[] = sfpackage.class.inc
 
 dependencies[] = simple_features
